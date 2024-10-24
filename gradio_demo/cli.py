@@ -1,7 +1,7 @@
 import sys
 import os
 
-# Adjust sys.path to include the parent directory
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 if parent_dir not in sys.path:
@@ -30,15 +30,11 @@ from detectron2.data.detection_utils import convert_PIL_to_numpy, _apply_exif_or
 from torchvision.transforms.functional import to_pil_image
 import apply_net
 
-# Constants
-WIDTH_TO_USE, HEIGHT_TO_USE = 384, 512  # Adjust as needed
 
+WIDTH_TO_USE, HEIGHT_TO_USE = 384, 512  
 
-
-# Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Masking functions
 def pil_to_binary_mask(pil_image, threshold=0):
     np_image = np.array(pil_image)
     grayscale_image = Image.fromarray(np_image).convert("L")
@@ -48,18 +44,15 @@ def pil_to_binary_mask(pil_image, threshold=0):
     output_mask = Image.fromarray(mask)
     return output_mask
 
-# Initialize models and pipeline
 def initialize_pipeline():
     base_path = "yisol/IDM-VTON"
-
-    # Load models
+    
     unet = UNet2DConditionModel.from_pretrained(
         base_path,
         subfolder="unet",
         torch_dtype=torch.float32,
     )
     unet.requires_grad_(False)
-
     tokenizer_one = AutoTokenizer.from_pretrained(
         base_path,
         subfolder="tokenizer",
@@ -71,7 +64,6 @@ def initialize_pipeline():
         use_fast=False,
     )
     noise_scheduler = DDPMScheduler.from_pretrained(base_path, subfolder="scheduler")
-
     text_encoder_one = CLIPTextModel.from_pretrained(
         base_path,
         subfolder="text_encoder",
@@ -92,29 +84,23 @@ def initialize_pipeline():
         subfolder="vae",
         torch_dtype=torch.float32,
     )
-
-    # Reference UNet Encoder
+    
     UNet_Encoder = UNet2DConditionModel_ref.from_pretrained(
         base_path,
         subfolder="unet_encoder",
         torch_dtype=torch.float32,
     )
 
-    # Parsing and OpenPose models
     parsing_model = Parsing(0)
     openpose_model = OpenPose(0)
-
-    # Freeze models
+    
     for model in [UNet_Encoder, image_encoder, vae, unet, text_encoder_one, text_encoder_two]:
         model.requires_grad_(False)
-
-    # Define transforms
     tensor_transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize([0.5], [0.5]),
     ])
-
-    # Initialize pipeline
+    
     pipe = TryonPipeline.from_pretrained(
         base_path,
         unet=unet,
@@ -133,16 +119,13 @@ def initialize_pipeline():
 
     return pipe, openpose_model, parsing_model, tensor_transform
 
-# Try-on function
 def start_tryon(pipe, openpose_model, parsing_model, tensor_transform, 
                human_image_path, garment_image_path, garment_description,
                use_auto_mask, use_auto_crop, denoise_steps, seed, output_path):
 
-    # Load and preprocess images
     garm_img = Image.open(garment_image_path).convert("RGB").resize((WIDTH_TO_USE, HEIGHT_TO_USE))
     human_img_orig = Image.open(human_image_path).convert("RGB")
 
-    # Optional cropping
     if use_auto_crop:
         width, height = human_img_orig.size
         target_width = int(min(width, height * (3 / 4)))
@@ -157,44 +140,38 @@ def start_tryon(pipe, openpose_model, parsing_model, tensor_transform,
     else:
         human_img = human_img_orig.resize((WIDTH_TO_USE, HEIGHT_TO_USE))
 
-    # Masking
     if use_auto_mask:
         keypoints = openpose_model(human_img.resize((384, 512)))
         model_parse, _ = parsing_model(human_img.resize((384, 512)))
         mask, mask_gray = get_mask_location('hd', "upper_body", model_parse, keypoints)
         mask = mask.resize((WIDTH_TO_USE, HEIGHT_TO_USE))
     else:
-        # If not using auto mask, create a binary mask (you can customize this part)
+        
         mask = pil_to_binary_mask(human_img_orig.resize((WIDTH_TO_USE, HEIGHT_TO_USE)))
     
-    # Prepare mask for pipeline
     mask_gray = (1 - transforms.ToTensor()(mask)) * tensor_transform(human_img)
     mask_gray = to_pil_image((mask_gray + 1.0) / 2.0)
 
-    # Convert human image for pipeline
     human_img_arg = _apply_exif_orientation(human_img.resize((384, 512)))
     human_img_arg = convert_PIL_to_numpy(human_img_arg, format="BGR")
 
-    # Generate pose image
     args = apply_net.create_argument_parser().parse_args((
         'show', '../configs/densepose_rcnn_R_50_FPN_s1x.yaml', 
-        '../ckpt/densepose/model_final_162be9.pkl', 'dp_segm', '-v', 
-        # '../yisol/IDM-VTON/densepose/model_final_162be9.pkl', 'dp_segm', '-v', 
+        '../yisol/IDM-VTON/densepose/model_final_162be9.pkl', 'dp_segm', '-v', 
+        
         '--opts', 'MODEL.DEVICE', 'cpu'
     ))
     pose_img = args.func(args, human_img_arg)
     pose_img = pose_img[:, :, ::-1]
     pose_img = Image.fromarray(pose_img).resize((WIDTH_TO_USE, HEIGHT_TO_USE))
-
-    # Encode prompts
+    
     with torch.no_grad():
-        if garment_description.strip():  # Check if garment_description is not empty or just whitespace
+        if garment_description.strip():  
             prompt = f"model is wearing {garment_description}"
             prompt_c = f"a photo of {garment_description}"
         else:
-            prompt = "model is wearing stylish clothing"          # Default prompt
-            prompt_c = "a photo of stylish clothing"              # Default prompt for cloth
-
+            prompt = "model is wearing stylish clothing"          
+            prompt_c = "a photo of stylish clothing"              
         negative_prompt = "monochrome, lowres, bad anatomy, worst quality, low quality"
 
         prompt_embeds, negative_prompt_embeds, pooled_prompt_embeds, negative_pooled_prompt_embeds = pipe.encode_prompt(
@@ -203,20 +180,17 @@ def start_tryon(pipe, openpose_model, parsing_model, tensor_transform,
             do_classifier_free_guidance=True,
             negative_prompt=negative_prompt,
         )
-
         prompt_embeds_c, _, _, _ = pipe.encode_prompt(
             prompt_c,
             num_images_per_prompt=1,
             do_classifier_free_guidance=False,
             negative_prompt=negative_prompt,
         )
-
-        # Prepare inputs
+        
         pose_img = tensor_transform(pose_img).unsqueeze(0).to(device, torch.float32)
         garm_tensor = tensor_transform(garm_img).unsqueeze(0).to(device, torch.float32)
         generator = torch.Generator(device).manual_seed(seed) if seed is not None else None
 
-        # Run pipeline
         images = pipe(
             prompt_embeds=prompt_embeds.to(device, torch.float32),
             negative_prompt_embeds=negative_prompt_embeds.to(device, torch.float32),
@@ -236,7 +210,6 @@ def start_tryon(pipe, openpose_model, parsing_model, tensor_transform,
             guidance_scale=2.0,
         )[0]
 
-    # Post-processing and saving
     if use_auto_crop:
         out_img = images[0].resize(crop_size)        
         human_img_orig.paste(out_img, (int(left), int(top)))    
@@ -244,12 +217,10 @@ def start_tryon(pipe, openpose_model, parsing_model, tensor_transform,
     else:
         final_image = images[0]
 
-    # Save the output
     final_image.save(output_path)
     mask_gray.save(f"masked_{os.path.basename(output_path)}")
     print(f"Output saved to {output_path} and masked image saved to masked_{os.path.basename(output_path)}")
 
-# Argument parser
 def parse_arguments():
     parser = argparse.ArgumentParser(description="IDM-VITON CLI Try-On Tool")
     parser.add_argument("--human_image", type=str, required=True, help="Path to the human image")
@@ -257,8 +228,8 @@ def parse_arguments():
     parser.add_argument(
     "--garment_description",
     type=str,
-    required=False,  # Make it optional
-    default="",      # Default to empty string if not provided
+    required=False,  
+    default="",      
     help="Description of the garment (e.g., 'Short Sleeve Round Neck T-shirt')",
     )
     parser.add_argument("--use_auto_mask", action="store_true", help="Use auto-generated mask")
@@ -270,7 +241,6 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-
     pipe, openpose_model, parsing_model, tensor_transform = initialize_pipeline()
     start_tryon(
         pipe=pipe,
