@@ -1,0 +1,11 @@
+data
+ckpt/
+cloth
+image
+yisol
+data
+ckpt
+__pycache__
+__pycache__/
+data/
+result/

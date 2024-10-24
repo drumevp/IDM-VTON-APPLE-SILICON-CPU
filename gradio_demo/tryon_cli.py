@@ -1,0 +1,291 @@
+import sys
+import os
+
+# Adjust sys.path to include the parent directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+from PIL import Image
+import argparse
+import torch
+from torchvision import transforms
+from src.tryon_pipeline import StableDiffusionXLInpaintPipeline as TryonPipeline
+from src.unet_hacked_garmnet import UNet2DConditionModel as UNet2DConditionModel_ref
+from src.unet_hacked_tryon import UNet2DConditionModel
+from transformers import (
+    CLIPImageProcessor,
+    CLIPVisionModelWithProjection,
+    CLIPTextModel,
+    CLIPTextModelWithProjection,
+    AutoTokenizer
+)
+from diffusers import DDPMScheduler, AutoencoderKL
+import numpy as np
+from utils_mask import get_mask_location
+from preprocess.humanparsing.run_parsing import Parsing
+from preprocess.openpose.run_openpose import OpenPose
+from detectron2.data.detection_utils import convert_PIL_to_numpy, _apply_exif_orientation
+from torchvision.transforms.functional import to_pil_image
+import apply_net
+
+# Constants
+WIDTH_TO_USE, HEIGHT_TO_USE = 384, 512  # Adjust as needed
+
+
+
+# Device configuration
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Masking functions
+def pil_to_binary_mask(pil_image, threshold=0):
+    np_image = np.array(pil_image)
+    grayscale_image = Image.fromarray(np_image).convert("L")
+    binary_mask = np.array(grayscale_image) > threshold
+    mask = np.zeros(binary_mask.shape, dtype=np.uint8)
+    mask[binary_mask] = 255
+    output_mask = Image.fromarray(mask)
+    return output_mask
+
+# Initialize models and pipeline
+def initialize_pipeline():
+    base_path = "yisol/IDM-VTON"
+
+    # Load models
+    unet = UNet2DConditionModel.from_pretrained(
+        base_path,
+        subfolder="unet",
+        torch_dtype=torch.float32,
+    )
+    unet.requires_grad_(False)
+
+    tokenizer_one = AutoTokenizer.from_pretrained(
+        base_path,
+        subfolder="tokenizer",
+        use_fast=False,
+    )
+    tokenizer_two = AutoTokenizer.from_pretrained(
+        base_path,
+        subfolder="tokenizer_2",
+        use_fast=False,
+    )
+    noise_scheduler = DDPMScheduler.from_pretrained(base_path, subfolder="scheduler")
+
+    text_encoder_one = CLIPTextModel.from_pretrained(
+        base_path,
+        subfolder="text_encoder",
+        torch_dtype=torch.float32,
+    )
+    text_encoder_two = CLIPTextModelWithProjection.from_pretrained(
+        base_path,
+        subfolder="text_encoder_2",
+        torch_dtype=torch.float32,
+    )
+    image_encoder = CLIPVisionModelWithProjection.from_pretrained(
+        base_path,
+        subfolder="image_encoder",
+        torch_dtype=torch.float32,
+    )
+    vae = AutoencoderKL.from_pretrained(
+        base_path,
+        subfolder="vae",
+        torch_dtype=torch.float32,
+    )
+
+    # Reference UNet Encoder
+    UNet_Encoder = UNet2DConditionModel_ref.from_pretrained(
+        base_path,
+        subfolder="unet_encoder",
+        torch_dtype=torch.float32,
+    )
+
+    # Parsing and OpenPose models
+    parsing_model = Parsing(0)
+    openpose_model = OpenPose(0)
+
+    # Freeze models
+    for model in [UNet_Encoder, image_encoder, vae, unet, text_encoder_one, text_encoder_two]:
+        model.requires_grad_(False)
+
+    # Define transforms
+    tensor_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize([0.5], [0.5]),
+    ])
+
+    # Initialize pipeline
+    pipe = TryonPipeline.from_pretrained(
+        base_path,
+        unet=unet,
+        vae=vae,
+        feature_extractor=CLIPImageProcessor(),
+        text_encoder=text_encoder_one,
+        text_encoder_2=text_encoder_two,
+        tokenizer=tokenizer_one,
+        tokenizer_2=tokenizer_two,
+        scheduler=noise_scheduler,
+        image_encoder=image_encoder,
+        torch_dtype=torch.float32,
+    )
+    pipe.unet_encoder = UNet_Encoder
+    pipe.to(device)
+
+    return pipe, openpose_model, parsing_model, tensor_transform
+
+# Try-on function
+def start_tryon(pipe, openpose_model, parsing_model, tensor_transform, 
+               human_image_path, garment_image_path, garment_description,
+               use_auto_mask, use_auto_crop, denoise_steps, seed, output_path):
+
+    # Load and preprocess images
+    garm_img = Image.open(garment_image_path).convert("RGB").resize((WIDTH_TO_USE, HEIGHT_TO_USE))
+    human_img_orig = Image.open(human_image_path).convert("RGB")
+
+    # Optional cropping
+    if use_auto_crop:
+        width, height = human_img_orig.size
+        target_width = int(min(width, height * (3 / 4)))
+        target_height = int(min(height, width * (4 / 3)))
+        left = (width - target_width) / 2
+        top = (height - target_height) / 2
+        right = (width + target_width) / 2
+        bottom = (height + target_height) / 2
+        cropped_img = human_img_orig.crop((left, top, right, bottom))
+        crop_size = cropped_img.size
+        human_img = cropped_img.resize((WIDTH_TO_USE, HEIGHT_TO_USE))
+    else:
+        human_img = human_img_orig.resize((WIDTH_TO_USE, HEIGHT_TO_USE))
+
+    # Masking
+    if use_auto_mask:
+        keypoints = openpose_model(human_img.resize((384, 512)))
+        model_parse, _ = parsing_model(human_img.resize((384, 512)))
+        mask, mask_gray = get_mask_location('hd', "upper_body", model_parse, keypoints)
+        mask = mask.resize((WIDTH_TO_USE, HEIGHT_TO_USE))
+    else:
+        # If not using auto mask, create a binary mask (you can customize this part)
+        mask = pil_to_binary_mask(human_img_orig.resize((WIDTH_TO_USE, HEIGHT_TO_USE)))
+    
+    # Prepare mask for pipeline
+    mask_gray = (1 - transforms.ToTensor()(mask)) * tensor_transform(human_img)
+    mask_gray = to_pil_image((mask_gray + 1.0) / 2.0)
+
+    # Convert human image for pipeline
+    human_img_arg = _apply_exif_orientation(human_img.resize((384, 512)))
+    human_img_arg = convert_PIL_to_numpy(human_img_arg, format="BGR")
+
+    # Generate pose image
+    args = apply_net.create_argument_parser().parse_args((
+        'show', '../configs/densepose_rcnn_R_50_FPN_s1x.yaml', 
+        '../ckpt/densepose/model_final_162be9.pkl', 'dp_segm', '-v', 
+        # '../yisol/IDM-VTON/densepose/model_final_162be9.pkl', 'dp_segm', '-v', 
+        '--opts', 'MODEL.DEVICE', 'cpu'
+    ))
+    pose_img = args.func(args, human_img_arg)
+    pose_img = pose_img[:, :, ::-1]
+    pose_img = Image.fromarray(pose_img).resize((WIDTH_TO_USE, HEIGHT_TO_USE))
+
+    # Encode prompts
+    with torch.no_grad():
+        if garment_description.strip():  # Check if garment_description is not empty or just whitespace
+            prompt = f"model is wearing {garment_description}"
+            prompt_c = f"a photo of {garment_description}"
+        else:
+            prompt = "model is wearing stylish clothing"          # Default prompt
+            prompt_c = "a photo of stylish clothing"              # Default prompt for cloth
+
+        negative_prompt = "monochrome, lowres, bad anatomy, worst quality, low quality"
+
+        prompt_embeds, negative_prompt_embeds, pooled_prompt_embeds, negative_pooled_prompt_embeds = pipe.encode_prompt(
+            prompt,
+            num_images_per_prompt=1,
+            do_classifier_free_guidance=True,
+            negative_prompt=negative_prompt,
+        )
+
+        prompt_embeds_c, _, _, _ = pipe.encode_prompt(
+            prompt_c,
+            num_images_per_prompt=1,
+            do_classifier_free_guidance=False,
+            negative_prompt=negative_prompt,
+        )
+
+        # Prepare inputs
+        pose_img = tensor_transform(pose_img).unsqueeze(0).to(device, torch.float32)
+        garm_tensor = tensor_transform(garm_img).unsqueeze(0).to(device, torch.float32)
+        generator = torch.Generator(device).manual_seed(seed) if seed is not None else None
+
+        # Run pipeline
+        images = pipe(
+            prompt_embeds=prompt_embeds.to(device, torch.float32),
+            negative_prompt_embeds=negative_prompt_embeds.to(device, torch.float32),
+            pooled_prompt_embeds=pooled_prompt_embeds.to(device, torch.float32),
+            negative_pooled_prompt_embeds=negative_pooled_prompt_embeds.to(device, torch.float32),
+            num_inference_steps=denoise_steps,
+            generator=generator,
+            strength=1.0,
+            pose_img=pose_img.to(device, torch.float32),
+            text_embeds_cloth=prompt_embeds_c.to(device, torch.float32),
+            cloth=garm_tensor.to(device, torch.float32),
+            mask_image=mask,
+            image=human_img, 
+            height=HEIGHT_TO_USE,
+            width=WIDTH_TO_USE,
+            ip_adapter_image=garm_img.resize((WIDTH_TO_USE, HEIGHT_TO_USE)),
+            guidance_scale=2.0,
+        )[0]
+
+    # Post-processing and saving
+    if use_auto_crop:
+        out_img = images[0].resize(crop_size)        
+        human_img_orig.paste(out_img, (int(left), int(top)))    
+        final_image = human_img_orig
+    else:
+        final_image = images[0]
+
+    # Save the output
+    final_image.save(output_path)
+    mask_gray.save(f"masked_{os.path.basename(output_path)}")
+    print(f"Output saved to {output_path} and masked image saved to masked_{os.path.basename(output_path)}")
+
+# Argument parser
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="IDM-VITON CLI Try-On Tool")
+    parser.add_argument("--human_image", type=str, required=True, help="Path to the human image")
+    parser.add_argument("--garment_image", type=str, required=True, help="Path to the garment image")
+    parser.add_argument(
+    "--garment_description",
+    type=str,
+    required=False,  # Make it optional
+    default="",      # Default to empty string if not provided
+    help="Description of the garment (e.g., 'Short Sleeve Round Neck T-shirt')",
+    )
+    parser.add_argument("--use_auto_mask", action="store_true", help="Use auto-generated mask")
+    parser.add_argument("--use_auto_crop", action="store_true", help="Use auto-crop and resizing")
+    parser.add_argument("--denoise_steps", type=int, default=20, help="Number of denoising steps")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
+    parser.add_argument("--output", type=str, default="output.png", help="Path to save the output image")
+    return parser.parse_args()
+
+def main():
+    args = parse_arguments()
+
+    pipe, openpose_model, parsing_model, tensor_transform = initialize_pipeline()
+    start_tryon(
+        pipe=pipe,
+        openpose_model=openpose_model,
+        parsing_model=parsing_model,
+        tensor_transform=tensor_transform,
+        human_image_path=args.human_image,
+        garment_image_path=args.garment_image,
+        garment_description=args.garment_description,
+        use_auto_mask=args.use_auto_mask,
+        use_auto_crop=args.use_auto_crop,
+        denoise_steps=args.denoise_steps,
+        seed=args.seed,
+        output_path=args.output
+    )
+
+if __name__ == "__main__":
+    main()

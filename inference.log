@@ -1,0 +1,206 @@
+2024-10-23 16:02:33,174 - INFO - Using MPS device
+2024-10-23 16:02:33,175 - INFO - Parsing command-line arguments
+2024-10-23 16:02:33,175 - INFO - Output directory set to: output/dresscode
+2024-10-23 16:02:33,175 - INFO - Pretrained model path: yisol/IDM-VTON
+2024-10-23 16:02:33,175 - INFO - Loading UNet model
+2024-10-23 16:02:39,160 - INFO - UNet model loaded successfully
+2024-10-23 16:02:39,162 - INFO - Loading tokenizer_one
+2024-10-23 16:02:39,453 - INFO - tokenizer_one loaded successfully
+2024-10-23 16:02:39,453 - INFO - Loading tokenizer_two
+2024-10-23 16:02:39,644 - INFO - tokenizer_two loaded successfully
+2024-10-23 16:02:39,644 - INFO - Loading noise_scheduler
+2024-10-23 16:02:40,330 - INFO - noise_scheduler loaded successfully
+2024-10-23 16:02:40,330 - INFO - Loading text_encoder_one
+2024-10-23 16:02:41,693 - INFO - text_encoder_one loaded successfully
+2024-10-23 16:02:41,693 - INFO - Loading text_encoder_two
+2024-10-23 16:02:48,685 - INFO - text_encoder_two loaded successfully
+2024-10-23 16:02:48,685 - INFO - Loading image_encoder
+2024-10-23 16:02:56,153 - INFO - image_encoder loaded successfully
+2024-10-23 16:02:56,153 - INFO - Loading VAE
+2024-10-23 16:02:56,404 - INFO - VAE loaded successfully
+2024-10-23 16:02:56,404 - INFO - Loading UNet_Encoder
+2024-10-23 16:02:57,274 - INFO - UNet_Encoder loaded successfully
+2024-10-23 16:02:57,274 - INFO - Initializing Parsing model
+2024-10-23 16:02:57,833 - INFO - Parsing model initialized
+2024-10-23 16:02:57,834 - INFO - Initializing OpenPose model
+2024-10-23 16:02:58,083 - INFO - OpenPose model initialized
+2024-10-23 16:02:58,083 - INFO - Moving models to device
+2024-10-23 16:06:17,793 - INFO - Using MPS device
+2024-10-23 16:06:17,793 - INFO - Parsing command-line arguments
+2024-10-23 16:06:17,793 - INFO - Output directory set to: output/dresscode
+2024-10-23 16:06:17,793 - INFO - Pretrained model path: yisol/IDM-VTON
+2024-10-23 16:06:17,793 - INFO - Loading UNet model
+2024-10-23 16:06:23,587 - INFO - UNet model loaded successfully
+2024-10-23 16:06:23,590 - INFO - Loading tokenizer_one
+2024-10-23 16:06:23,981 - INFO - tokenizer_one loaded successfully
+2024-10-23 16:06:23,981 - INFO - Loading tokenizer_two
+2024-10-23 16:06:24,164 - INFO - tokenizer_two loaded successfully
+2024-10-23 16:06:24,164 - INFO - Loading noise_scheduler
+2024-10-23 16:06:24,887 - INFO - noise_scheduler loaded successfully
+2024-10-23 16:06:24,888 - INFO - Loading text_encoder_one
+2024-10-23 16:06:26,075 - INFO - text_encoder_one loaded successfully
+2024-10-23 16:06:26,076 - INFO - Loading text_encoder_two
+2024-10-23 16:06:33,622 - INFO - text_encoder_two loaded successfully
+2024-10-23 16:06:33,622 - INFO - Loading image_encoder
+2024-10-23 16:06:40,774 - INFO - image_encoder loaded successfully
+2024-10-23 16:06:40,776 - INFO - Loading VAE
+2024-10-23 16:06:41,054 - INFO - VAE loaded successfully
+2024-10-23 16:06:41,054 - INFO - Loading UNet_Encoder
+2024-10-23 16:06:41,860 - INFO - UNet_Encoder loaded successfully
+2024-10-23 16:06:41,860 - INFO - Initializing Parsing model
+2024-10-23 16:06:42,551 - INFO - Parsing model initialized
+2024-10-23 16:06:42,551 - INFO - Initializing OpenPose model
+2024-10-23 16:06:42,825 - INFO - OpenPose model initialized
+2024-10-23 16:06:42,825 - INFO - Moving models to device
+2024-10-23 16:09:30,133 - INFO - Using MPS device
+2024-10-23 16:09:30,133 - INFO - Parsing command-line arguments
+2024-10-23 16:09:30,134 - INFO - Output directory set to: output/dresscode
+2024-10-23 16:09:30,134 - INFO - Pretrained model path: yisol/IDM-VTON
+2024-10-23 16:09:30,134 - INFO - Loading UNet model
+2024-10-23 16:09:36,688 - INFO - UNet model loaded successfully
+2024-10-23 16:09:36,698 - INFO - Loading tokenizer_one
+2024-10-23 16:09:37,145 - INFO - tokenizer_one loaded successfully
+2024-10-23 16:09:37,150 - INFO - Loading tokenizer_two
+2024-10-23 16:09:37,342 - INFO - tokenizer_two loaded successfully
+2024-10-23 16:09:37,342 - INFO - Loading noise_scheduler
+2024-10-23 16:10:08,623 - INFO - Using MPS device
+2024-10-23 16:10:08,623 - INFO - Parsing command-line arguments
+2024-10-23 16:10:08,624 - INFO - Output directory set to: output/dresscode
+2024-10-23 16:10:08,624 - INFO - Pretrained model path: yisol/IDM-VTON
+2024-10-23 16:10:08,624 - INFO - Loading UNet model
+2024-10-23 16:10:14,128 - INFO - UNet model loaded successfully
+2024-10-23 16:10:14,131 - INFO - Loading tokenizer_one
+2024-10-23 16:10:14,351 - INFO - tokenizer_one loaded successfully
+2024-10-23 16:10:14,351 - INFO - Loading tokenizer_two
+2024-10-23 16:10:14,779 - INFO - tokenizer_two loaded successfully
+2024-10-23 16:10:14,779 - INFO - Loading noise_scheduler
+2024-10-23 16:10:15,236 - INFO - noise_scheduler loaded successfully
+2024-10-23 16:10:15,237 - INFO - Loading text_encoder_one
+2024-10-23 16:10:16,537 - INFO - text_encoder_one loaded successfully
+2024-10-23 16:10:16,538 - INFO - Loading text_encoder_two
+2024-10-23 16:10:24,221 - INFO - text_encoder_two loaded successfully
+2024-10-23 16:10:24,222 - INFO - Loading image_encoder
+2024-10-23 16:10:31,407 - INFO - image_encoder loaded successfully
+2024-10-23 16:10:31,408 - INFO - Loading VAE
+2024-10-23 16:10:31,615 - INFO - VAE loaded successfully
+2024-10-23 16:10:31,616 - INFO - Loading UNet_Encoder
+2024-10-23 16:10:32,262 - INFO - UNet_Encoder loaded successfully
+2024-10-23 16:10:32,262 - INFO - Initializing Parsing model
+2024-10-23 16:10:32,970 - INFO - Parsing model initialized
+2024-10-23 16:10:32,972 - INFO - Initializing OpenPose model
+2024-10-23 16:10:33,226 - INFO - OpenPose model initialized
+2024-10-23 16:10:33,226 - INFO - Moving models to device
+2024-10-23 16:13:13,286 - INFO - Using MPS device
+2024-10-23 16:13:13,286 - INFO - Parsing command-line arguments
+2024-10-23 16:13:13,286 - INFO - Output directory set to: output/dresscode
+2024-10-23 16:13:13,286 - INFO - Pretrained model path: yisol/IDM-VTON
+2024-10-23 16:13:13,286 - INFO - Loading UNet model
+2024-10-23 16:13:19,063 - INFO - UNet model loaded successfully
+2024-10-23 16:13:19,066 - INFO - Loading tokenizer_one
+2024-10-23 16:13:19,360 - INFO - tokenizer_one loaded successfully
+2024-10-23 16:13:19,360 - INFO - Loading tokenizer_two
+2024-10-23 16:13:19,802 - INFO - tokenizer_two loaded successfully
+2024-10-23 16:13:19,802 - INFO - Loading noise_scheduler
+2024-10-23 16:13:20,603 - INFO - noise_scheduler loaded successfully
+2024-10-23 16:13:20,603 - INFO - Loading text_encoder_one
+2024-10-23 16:13:21,613 - INFO - text_encoder_one loaded successfully
+2024-10-23 16:13:21,613 - INFO - Loading text_encoder_two
+2024-10-23 16:13:29,695 - INFO - text_encoder_two loaded successfully
+2024-10-23 16:13:29,695 - INFO - Loading image_encoder
+2024-10-23 16:13:36,596 - INFO - image_encoder loaded successfully
+2024-10-23 16:13:36,596 - INFO - Loading VAE
+2024-10-23 16:13:36,834 - INFO - VAE loaded successfully
+2024-10-23 16:13:36,834 - INFO - Loading UNet_Encoder
+2024-10-23 16:13:37,617 - INFO - UNet_Encoder loaded successfully
+2024-10-23 16:13:37,617 - INFO - Initializing Parsing model
+2024-10-23 16:13:38,358 - INFO - Parsing model initialized
+2024-10-23 16:13:38,358 - INFO - Initializing OpenPose model
+2024-10-23 16:13:38,626 - INFO - OpenPose model initialized
+2024-10-23 16:13:38,629 - INFO - Moving models to device
+2024-10-23 16:13:38,646 - ERROR - Error moving parsing_model to device: 'Parsing' object has no attribute 'to'
+2024-10-23 16:13:38,646 - INFO - Attempting to access 'model' attribute of parsing_model
+2024-10-23 16:13:38,646 - ERROR - parsing_model does not have a 'model' attribute. Please check the Parsing class implementation.
+2024-10-23 16:17:21,123 - INFO - Using MPS device
+2024-10-23 16:17:21,123 - INFO - Parsing command-line arguments
+2024-10-23 16:17:21,124 - INFO - Output directory set to: output/dresscode
+2024-10-23 16:17:21,124 - INFO - Pretrained model path: yisol/IDM-VTON
+2024-10-23 16:17:21,124 - INFO - Loading UNet model
+2024-10-23 16:17:27,813 - INFO - UNet model loaded successfully
+2024-10-23 16:17:27,822 - INFO - Loading tokenizer_one
+2024-10-23 16:17:28,519 - INFO - tokenizer_one loaded successfully
+2024-10-23 16:17:28,581 - INFO - Loading tokenizer_two
+2024-10-23 16:17:28,772 - INFO - tokenizer_two loaded successfully
+2024-10-23 16:17:28,772 - INFO - Loading noise_scheduler
+2024-10-23 16:17:29,582 - INFO - noise_scheduler loaded successfully
+2024-10-23 16:17:29,583 - INFO - Loading text_encoder_one
+2024-10-23 16:17:30,981 - INFO - text_encoder_one loaded successfully
+2024-10-23 16:17:30,981 - INFO - Loading text_encoder_two
+2024-10-23 16:17:39,289 - INFO - text_encoder_two loaded successfully
+2024-10-23 16:17:39,289 - INFO - Loading image_encoder
+2024-10-23 16:17:46,864 - INFO - image_encoder loaded successfully
+2024-10-23 16:17:46,865 - INFO - Loading VAE
+2024-10-23 16:17:47,130 - INFO - VAE loaded successfully
+2024-10-23 16:17:47,130 - INFO - Loading UNet_Encoder
+2024-10-23 16:17:47,923 - INFO - UNet_Encoder loaded successfully
+2024-10-23 16:17:47,923 - INFO - Initializing Parsing model
+2024-10-23 16:17:48,476 - INFO - Parsing model initialized
+2024-10-23 16:17:48,477 - INFO - Initializing OpenPose model
+2024-10-23 16:17:48,759 - INFO - OpenPose model initialized
+2024-10-23 16:17:48,759 - INFO - Moving models to device
+2024-10-23 16:17:48,778 - INFO - OpenPose model moved to device successfully
+2024-10-23 16:17:48,778 - INFO - Setting models to evaluation mode
+2024-10-23 16:21:49,090 - INFO - Using device: cpu
+2024-10-23 16:21:49,090 - INFO - Parsing command-line arguments
+2024-10-23 16:21:49,090 - INFO - Output directory set to: output/dresscode
+2024-10-23 16:21:49,090 - INFO - Pretrained model path: yisol/IDM-VTON
+2024-10-23 16:21:49,090 - INFO - Loading UNet model
+2024-10-23 16:21:55,414 - INFO - UNet model loaded successfully
+2024-10-23 16:21:55,415 - INFO - Loading tokenizer_one
+2024-10-23 16:21:55,652 - INFO - tokenizer_one loaded successfully
+2024-10-23 16:21:55,652 - INFO - Loading tokenizer_two
+2024-10-23 16:21:55,845 - INFO - tokenizer_two loaded successfully
+2024-10-23 16:21:55,845 - INFO - Loading noise_scheduler
+2024-10-23 16:21:56,409 - INFO - noise_scheduler loaded successfully
+2024-10-23 16:21:56,409 - INFO - Loading text_encoder_one
+2024-10-23 16:21:57,862 - INFO - text_encoder_one loaded successfully
+2024-10-23 16:21:57,862 - INFO - Loading text_encoder_two
+2024-10-23 16:22:06,524 - INFO - text_encoder_two loaded successfully
+2024-10-23 16:22:06,526 - INFO - Loading image_encoder
+2024-10-23 16:22:14,681 - INFO - image_encoder loaded successfully
+2024-10-23 16:22:14,681 - INFO - Loading VAE
+2024-10-23 16:22:14,915 - INFO - VAE loaded successfully
+2024-10-23 16:22:14,915 - INFO - Loading UNet_Encoder
+2024-10-23 16:22:15,761 - INFO - UNet_Encoder loaded successfully
+2024-10-23 16:22:15,761 - INFO - Initializing Parsing model
+2024-10-23 16:22:16,511 - INFO - Parsing model initialized
+2024-10-23 16:22:16,511 - INFO - Initializing OpenPose model
+2024-10-23 16:22:16,766 - INFO - OpenPose model initialized
+2024-10-23 16:22:16,766 - INFO - Moving models to device
+2024-10-23 16:35:21,196 - INFO - Starting IDM-VTON Inference with Accelerate
+2024-10-23 16:35:21,197 - INFO - Output directory set to: output/dresscode
+2024-10-23 16:35:21,198 - INFO - Using device: cpu
+2024-10-23 16:35:21,199 - INFO - Random seed set to: 42
+2024-10-23 16:35:21,199 - INFO - Pretrained model path: yisol/IDM-VTON
+2024-10-23 16:35:21,199 - INFO - Loading UNet model
+2024-10-23 16:35:27,805 - INFO - UNet model loaded successfully
+2024-10-23 16:35:27,810 - INFO - Loading tokenizer_one
+2024-10-23 16:35:28,091 - INFO - tokenizer_one loaded successfully
+2024-10-23 16:35:28,091 - INFO - Loading tokenizer_two
+2024-10-23 16:35:28,277 - INFO - tokenizer_two loaded successfully
+2024-10-23 16:35:28,277 - INFO - Loading noise_scheduler
+2024-10-23 16:35:29,013 - INFO - noise_scheduler loaded successfully
+2024-10-23 16:35:29,013 - INFO - Loading text_encoder_one
+2024-10-23 16:35:30,756 - INFO - text_encoder_one loaded successfully
+2024-10-23 16:35:30,756 - INFO - Loading text_encoder_two
+2024-10-23 16:35:39,228 - INFO - text_encoder_two loaded successfully
+2024-10-23 16:35:39,228 - INFO - Loading image_encoder
+2024-10-23 16:35:46,724 - INFO - image_encoder loaded successfully
+2024-10-23 16:35:46,724 - INFO - Loading VAE
+2024-10-23 16:35:46,960 - INFO - VAE loaded successfully
+2024-10-23 16:35:46,960 - INFO - Loading UNet_Encoder
+2024-10-23 16:35:47,832 - INFO - UNet_Encoder loaded successfully
+2024-10-23 16:35:47,832 - INFO - Initializing Parsing model
+2024-10-23 16:35:48,490 - INFO - Parsing model initialized
+2024-10-23 16:35:48,490 - INFO - Initializing OpenPose model
+2024-10-23 16:35:48,746 - INFO - OpenPose model initialized
+2024-10-23 16:35:48,746 - INFO - Moving models to device
