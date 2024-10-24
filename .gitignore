@@ -3,6 +3,7 @@ ckpt/
 cloth
 image
 yisol
+yisol/
 data
 ckpt
 __pycache__
